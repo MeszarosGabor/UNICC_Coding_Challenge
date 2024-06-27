@@ -14,6 +14,9 @@ NOTIFICATION_PAYLOAD = {"foo": "bar"}
 
 def send_single_notification(
         payload: typing.Dict) -> constants.PayloadValidationResult:
+    if not payload.get("name"):
+        return constants.PayloadValidationResult.MISSING_NAME
+
     contact_type = payload.get("type")
     if not contact_type:
         return constants.PayloadValidationResult.MISSING_NOTIFICATION_TYPE

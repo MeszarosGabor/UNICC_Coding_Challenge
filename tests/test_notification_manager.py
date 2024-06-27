@@ -29,6 +29,19 @@ def test_send_single_notification__success(
     mocked_interface.assert_called_once()
 
 
+def test_send_single_notification__missing_name(
+    payload_all_fields_present,
+):
+    payload_all_fields_present["name"] = None
+
+    outcome = notification_manager.send_single_notification(
+        payload=payload_all_fields_present
+    )
+    assert (
+        outcome == constants.PayloadValidationResult.MISSING_NAME
+    )
+
+
 def test_send_single_notification__missing_notification_type(
     payload_all_fields_present,
 ):
