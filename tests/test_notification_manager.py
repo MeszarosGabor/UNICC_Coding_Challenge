@@ -8,8 +8,8 @@ import app.notification_manager as notification_manager
     "contact_type",
     [
         pytest.param("email"),
-        pytest.param("phone"),
-        pytest.param("url"),
+        pytest.param("sms"),
+        pytest.param("post"),
     ],
 )
 def test_send_single_notification__success(
@@ -72,15 +72,17 @@ def test_send_single_notification__invalid_notification_type(
     "contact_type",
     [
         pytest.param("email"),
-        pytest.param("phone"),
-        pytest.param("url"),
+        pytest.param("sms"),
+        pytest.param("post"),
     ],
 )
 def test_send_single_notification__missing_contact_of_notification_type(
     contact_type, payload_all_fields_present
 ):
     payload_all_fields_present["type"] = contact_type
-    payload_all_fields_present[contact_type] = None
+    payload_all_fields_present[
+        notification_manager.CONTACT_TYPE_TO_DATA_KEY[contact_type]
+    ] = None
 
     outcome = notification_manager.send_single_notification(
         payload=payload_all_fields_present
