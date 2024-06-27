@@ -1,6 +1,9 @@
 import collections
+import more_itertools
 import typing
+from concurrent.futures import ThreadPoolExecutor
 
+import app.constants as constants
 import app.notification_manager as notification_manager
 
 
@@ -21,5 +24,22 @@ def batch_notification_manager_single_threaded(
             # will not block the processing of the remaining items.
             # We nevertheless report the anomaly.
             stats[str(exc)] += 1
+
+    return stats
+
+
+def batch_notification_manager_multi_threaded(
+        payload: typing.List[typing.Dict]) -> typing.Dict:
+    max_workers = min(len(payload), constants.MULTITHREADING_MAX_WORKERS)
+
+    stats = collections.defaultdict(int)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for batch in more_itertools.ichunked(payload, max_workers):
+            futures = [executor.submit(
+                notification_manager.send_single_notification, item)
+                for item in batch
+            ]
+            for future in futures:
+                stats[future.result()] += 1
 
     return stats
