@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    command: python app/main.py
+    volumes:
+      - ./app:/app
+    networks:
+      - default
+
+  test:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    command: pytest /app/tests
+    volumes:
+      - ./app:/app
+      - ./tests:/app/tests
+    networks:
+      - default
+
+networks:
+  default:
