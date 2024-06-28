@@ -20,7 +20,7 @@ NOTIFICATION_PAYLOAD = {"foo": "bar"}
 
 
 def send_single_notification(
-        payload: typing.Dict) -> constants.PayloadValidationResult:
+        payload: typing.Dict) -> constants.PayloadValidationResult | str:
     if not payload.get("name"):
         return constants.PayloadValidationResult.MISSING_NAME
 
@@ -34,5 +34,8 @@ def send_single_notification(
     if not contact_info:
         return constants.PayloadValidationResult.MISSING_CONTACT_OF_NOTIFICATION_TYPE  # noqa E501
 
-    CONTACT_MECHANISM[contact_type](contact_info, NOTIFICATION_PAYLOAD)
-    return constants.PayloadValidationResult.VALID_PAYLOAD
+    try:
+        CONTACT_MECHANISM[contact_type](contact_info, NOTIFICATION_PAYLOAD)
+        return constants.PayloadValidationResult.VALID_PAYLOAD
+    except Exception as exc:
+        return str(exc)

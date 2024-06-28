@@ -16,6 +16,9 @@ def test_send_single_notification__success(
     contact_type, mocker, payload_single_item_all_fields_present
 ):
     payload_single_item_all_fields_present["type"] = contact_type
+
+    original_contact_mechanism =\
+        notification_manager.CONTACT_MECHANISM[contact_type]
     mocked_interface = mocker.patch(
         "app.interface_utils."
         f"{notification_manager.CONTACT_MECHANISM[contact_type].__name__}"
@@ -27,6 +30,10 @@ def test_send_single_notification__success(
     )
     assert outcome == constants.PayloadValidationResult.VALID_PAYLOAD
     mocked_interface.assert_called_once()
+
+    # TODO: consider turning this into a yield fixture
+    notification_manager.CONTACT_MECHANISM[contact_type] =\
+        original_contact_mechanism
 
 
 def test_send_single_notification__missing_name(
@@ -91,3 +98,35 @@ def test_send_single_notification__missing_contact_of_notification_type(
         outcome ==
         constants.PayloadValidationResult.MISSING_CONTACT_OF_NOTIFICATION_TYPE
     )
+
+
+@pytest.mark.parametrize(
+    "contact_type",
+    [
+        pytest.param("email"),
+        pytest.param("sms"),
+        pytest.param("post"),
+    ],
+)
+def test_send_single_notification__unexpected_error(
+    contact_type, mocker, payload_single_item_all_fields_present
+):
+    payload_single_item_all_fields_present["type"] = contact_type
+
+    original_contact_mechanism =\
+        notification_manager.CONTACT_MECHANISM[contact_type]
+    mocked_interface = mocker.patch(
+        "app.interface_utils."
+        f"{notification_manager.CONTACT_MECHANISM[contact_type].__name__}"
+    )
+    notification_manager.CONTACT_MECHANISM[contact_type] = mocked_interface
+
+    outcome = notification_manager.send_single_notification(
+        payload=payload_single_item_all_fields_present
+    )
+    assert outcome == constants.PayloadValidationResult.VALID_PAYLOAD
+    mocked_interface.assert_called_once()
+
+    # TODO: consider turning this into a yield fixture
+    notification_manager.CONTACT_MECHANISM[contact_type] =\
+        original_contact_mechanism
