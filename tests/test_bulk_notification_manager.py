@@ -1,5 +1,6 @@
 import app.constants as constants
 import app.bulk_notification_manager as bulk_notification_manager
+import app.notification_manager as notification_manager
 
 
 def test_batch_notification_manager_single_threaded(payload_full_range):
@@ -34,3 +35,46 @@ def test_batch_notification_manager_single_threaded__unexpected_exception(
     )
 
     assert outcomes == {"ValueError": 1}
+
+
+def test_batch_notification_manager_multi_threaded(payload_full_range):
+    outcomes = (
+        bulk_notification_manager.batch_notification_manager_multi_threaded(
+            payload_full_range
+            )
+    )
+
+    assert outcomes == {
+        constants.PayloadValidationResult.VALID_PAYLOAD: 1,
+        constants.PayloadValidationResult.MISSING_NAME: 1,
+        constants.PayloadValidationResult.MISSING_NOTIFICATION_TYPE: 1,
+        constants.PayloadValidationResult.INVALID_NOTIFICATION_TYPE: 1,
+        constants.PayloadValidationResult.MISSING_CONTACT_OF_NOTIFICATION_TYPE: 3,  # noqa E501
+    }
+
+
+def test_batch_notification_manager_multi_threaded__unexpected_exception(
+    mocker,
+    payload_single_item_all_fields_present,
+):
+    contact_type = payload_single_item_all_fields_present["type"]
+    original_contact_mechanism =\
+        notification_manager.CONTACT_MECHANISM[contact_type]
+    mocked_interface = mocker.patch(
+        "app.interface_utils."
+        f"{notification_manager.CONTACT_MECHANISM[contact_type].__name__}",
+        side_effect=ValueError("ValueError"),
+    )
+    notification_manager.CONTACT_MECHANISM[contact_type] = mocked_interface
+
+    outcomes = (
+        bulk_notification_manager.batch_notification_manager_multi_threaded(
+            [payload_single_item_all_fields_present]
+        )
+    )
+
+    assert outcomes == {"ValueError": 1}
+
+    # TODO: consider turning this into a yield fixture
+    notification_manager.CONTACT_MECHANISM[contact_type] =\
+        original_contact_mechanism
