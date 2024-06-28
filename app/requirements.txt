@@ -1,3 +1,5 @@
+ijson
+more_itertools
 pytest
 pytest-mock
 requests
