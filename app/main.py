@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     logger.info("Started Transaction fetching...")
-    transactions = transaction_fetcher.fetch_transaction_info()
+    transactions = transaction_fetcher.fetch_transaction_info_ram_optimized()
     logger.info("Comleted.Started notifications...")
     stats = bulk_notification_manager.batch_notification_manager_multi_threaded(transactions)  # noqa E501
     logger.info("Completed. Statistics:")

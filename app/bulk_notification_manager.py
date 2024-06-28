@@ -30,11 +30,12 @@ def batch_notification_manager_single_threaded(
 
 def batch_notification_manager_multi_threaded(
         payload: typing.List[typing.Dict]) -> typing.Dict:
-    max_workers = min(len(payload), constants.MULTITHREADING_MAX_WORKERS)
 
     stats = collections.defaultdict(int)
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        for batch in more_itertools.ichunked(payload, max_workers):
+    with ThreadPoolExecutor(
+            max_workers=constants.MULTITHREADING_MAX_WORKERS) as executor:
+        for batch in more_itertools.ichunked(
+                payload, constants.MULTITHREADING_MAX_WORKERS):
             futures = [executor.submit(
                 notification_manager.send_single_notification, item)
                 for item in batch

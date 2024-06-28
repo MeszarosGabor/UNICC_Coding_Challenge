@@ -19,3 +19,4 @@ class PayloadValidationResult(Enum):
 
 
 MULTITHREADING_MAX_WORKERS = 100
+DOWNLOAD_CHUNK_SIZE = 8192

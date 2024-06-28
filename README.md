@@ -2,7 +2,8 @@
 
 ## Considerations (partially based on the problem statements as well as on email exchanges with the team)
 - We develop a command line tool only. The tool takes no parameters (per problem statement) and operates with reasonably set constants.
-- The current implementation assumes that the contancts JSON input can be stored in memory. This constraint will be lifted at a later commit. 
+- The current implementation NO LONGER assumes that the contancts JSON input can be stored in memory. We assume we can save the JSON file to disk from
+which we can parse it without loading it all into memory. 
 
 ## SETUP
 - Have Python 3.11+ installed.
